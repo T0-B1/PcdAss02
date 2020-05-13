@@ -56,6 +56,8 @@ public class AsyncController extends Controller {
     }
 
     private void scrape(String pageUrl, int depth) {
+        log(depth, "Submitting request for "+pageUrl+" "+depth+" "+Thread.currentThread());
+
         URL url = null;
         try {
             url = new URL(pageUrl);
@@ -65,19 +67,14 @@ public class AsyncController extends Controller {
         String host = url.getHost();
         String path = url.getPath();
 
-        long start = System.currentTimeMillis();
-
-        log(depth, "Start scraping "+pageUrl+" "+depth+" "+Thread.currentThread());
         client
             .get(host,path)
             .send(ar -> {
                 if (ar.succeeded()) {
-                    log(depth, "Response arrived after "+(System.currentTimeMillis()-start) +" "+pageUrl+" "+depth+" "+Thread.currentThread());
-
+                    log(depth, "Analyzing content of "+pageUrl+" "+depth+" "+Thread.currentThread());
                     HttpResponse<Buffer> response = ar.result();
                     vertx.executeBlocking(promise->{
                         Document doc = Jsoup.parse(ar.result().bodyAsString());
-                        log(depth, "Updating label "+pageUrl+" "+depth+" "+Thread.currentThread());
                         graph.setdNodeLabel(pageUrl, doc.getElementById("firstHeading").text());
                         if(depth > 0) {
                             getLinksInWikiPage(doc).forEach(link->{
@@ -86,14 +83,11 @@ public class AsyncController extends Controller {
                             });
                         }
                         promise.complete();
-                    }, res->{
-                        log(depth, "Done adding edges "+pageUrl+" "+depth+" "+Thread.currentThread());
-                    });
+                    }, res->{});
                 } else {
                     log(depth, "Something went wrong " + ar.cause().getMessage());
                 }
             });
-        log(depth, "Return scraping "+pageUrl+" "+depth+" "+Thread.currentThread());
     }
 
     private void log(int depth, String text) {
