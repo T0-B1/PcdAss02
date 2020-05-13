@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+group 'unibo'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+javafx {
+    version = "14"
+    modules = [ 'javafx.controls' ]
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+    compile 'io.vertx:vertx-core:3.9.0'
+    compile 'io.vertx:vertx-web-client:3.9.0'
+
+    implementation 'com.github.graphstream:gs-ui-javafx:2.0-alpha'
+    implementation 'com.github.graphstream:gs-core:2.0.0-beta'
+    implementation 'com.github.graphstream:gs-algo:2.0.0-beta'
+}
