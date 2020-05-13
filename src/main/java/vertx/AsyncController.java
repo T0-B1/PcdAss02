@@ -56,8 +56,6 @@ public class AsyncController extends Controller {
     }
 
     private void scrape(String pageUrl, int depth) {
-        log(depth, "Submitting request for "+pageUrl+" "+depth+" "+Thread.currentThread());
-
         URL url = null;
         try {
             url = new URL(pageUrl);
@@ -71,9 +69,10 @@ public class AsyncController extends Controller {
             .get(host,path)
             .send(ar -> {
                 if (ar.succeeded()) {
-                    log(depth, "Analyzing content of "+pageUrl+" "+depth+" "+Thread.currentThread());
+                    log(depth, "Managing http response of "+pageUrl.substring(pageUrl.lastIndexOf('/'))+" "+depth+" "+Thread.currentThread());
                     HttpResponse<Buffer> response = ar.result();
                     vertx.executeBlocking(promise->{
+                        log(depth, "Scraping content of "+pageUrl.substring(pageUrl.lastIndexOf('/'))+" "+depth+" "+Thread.currentThread());
                         Document doc = Jsoup.parse(ar.result().bodyAsString());
                         graph.setdNodeLabel(pageUrl, doc.getElementById("firstHeading").text());
                         if(depth > 0) {
